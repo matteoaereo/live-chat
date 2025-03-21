@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Live Chat</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #chat-box { width: 90%; max-width: 400px; height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 10px; margin: auto; }
+        #message { width: 70%; }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const firebaseConfig = {
+                apiKey: "AIzaSyC71fGBfzlFtySABueYAi92_JRkGNl4jOA",
+                authDomain: "chatweb-p-m.firebaseapp.com",
+                projectId: "chatweb-p-m",
+                storageBucket: "chatweb-p-m.firebasestorage.app",
+                messagingSenderId: "805277226168",
+                appId: "1:805277226168:web:3b38f43253b5fb9721504d"
+            };
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+            const chatBox = document.getElementById("chat-box");
+
+            function sendMessage() {
+                const messageInput = document.getElementById("message");
+                if (messageInput.value.trim() !== "") {
+                    db.collection("messages").add({
+                        text: messageInput.value,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    messageInput.value = "";
+                }
+            }
+
+            db.collection("messages").orderBy("timestamp").onSnapshot(snapshot => {
+                chatBox.innerHTML = "";
+                snapshot.forEach(doc => {
+                    const msg = document.createElement("div");
+                    msg.textContent = doc.data().text;
+                    chatBox.appendChild(msg);
+                });
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+
+            window.sendMessage = sendMessage;
+        });
+    </script>
+</head>
+<body>
+    <h2>Live Chat</h2>
+    <div id="chat-box"></div>
+    <input type="text" id="message" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+</body>
+</html>
